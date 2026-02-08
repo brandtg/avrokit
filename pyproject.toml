@@ -4,11 +4,23 @@
 
 [tool.poetry]
 name = "avrokit"
-version = "0.1.0"
+version = "0.0.1"
 description = "Python utilities for working with Avro data files"
 authors = ["Greg Brandt <brandt.greg@gmail.com>"]
 license = "Apache-2.0"
 readme = "README.md"
+homepage = "https://github.com/brandtg/avrokit"
+repository = "https://github.com/brandtg/avrokit"
+keywords = ["avro", "data", "serialization", "gcs", "s3", "parquet"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",
+]
 include = ["avrokit/py.typed"]
 
 [tool.poetry.dependencies]

@@ -336,6 +336,28 @@ make license
 make build    # Build wheel and source distribution
 ```
 
+### Releasing to PyPI
+
+Releases are automated via GitHub Actions using [Trusted Publishing](https://docs.pypi.org/trusted-publishers/) (OIDC) - no API tokens needed.
+
+**One-time PyPI setup:**
+1. Log into [PyPI](https://pypi.org)
+2. Go to your project → Publishing
+3. Add a new pending publisher:
+   - **Owner**: `brandtg`
+   - **Repository**: `avrokit`
+   - **Workflow name**: `release.yml`
+4. Save the configuration
+
+**To release a new version:**
+1. Update version in `pyproject.toml` (e.g., `0.1.1`)
+2. Commit and push the version bump
+3. Go to GitHub → Releases → [Draft a new release](https://github.com/brandtg/avrokit/releases/new)
+4. Create a new tag matching the version (e.g., `v0.1.1`)
+5. Click **Publish release**
+
+The GitHub Actions workflow will automatically build and publish to PyPI.
+
 ## Python API Examples
 
 ### Working with Partitioned Files
