@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-.PHONY: install env test test-coverage lint typecheck format build lock
+.PHONY: install env test test-coverage lint typecheck format build publish lock
 
 install:
 	poetry install --with dev --extras all
@@ -12,6 +12,9 @@ env:
 
 build:
 	poetry build
+
+publish:
+	poetry publish
 
 test:
 	poetry run pytest -n auto
