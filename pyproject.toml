@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2026 Greg Brandt <brandt.greg@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[tool.poetry]
+name = "avrokit"
+version = "0.1.0"
+description = "Python utilities for working with Avro data files"
+authors = ["Greg Brandt <brandt.greg@gmail.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+include = ["avrokit/py.typed"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+avro = "^1.12.1"
+datetime-truncate = "^1.1.1"
+requests = "^2.32.3"
+boto3 = { version = "^1.38.7", optional = true }
+google-cloud-storage = { version = "^3.6.0", optional = true }
+google-crc32c = { version = "^1.7.1", optional = true }
+filelock = "^3.18.0"
+boto3-stubs = { extras = ["s3"], version = "^1.38.8" }
+types-requests = "^2.32.0.20250328"
+pyarrow = "^22.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+black = "^25.1.0"
+flake8 = "^7.2.0"
+pytest-env = "^1.1.5"
+faker = "^37.1.0"
+mypy = "^1.15.0"
+freezegun = "^1.5.1"
+pytest-xdist = "^3.6.1"
+moto = { extras = ["s3"], version = "^5.1.4" }
+reuse = "^5.0.2"
+docker = "^7.1.0"
+types-docker = "^7.1.0.20250503"
+pytest-cov = "^6.1.1"
+
+[tool.poetry.extras]
+aws = ["boto3"]
+gcp = ["google-cloud-storage", "google-crc32c"]
+all = ["boto3", "google-cloud-storage", "google-crc32c"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest_env]
+# TODO
+
+[tool.poetry.scripts]
+avrokit = "avrokit.tools.__main__:main"
