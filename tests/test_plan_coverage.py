@@ -9,14 +9,10 @@ High-priority tests based on coverage analysis from TEST_PLAN.md.
 import pytest
 import tempfile
 import os
-import json
-import logging
 from avrokit.tools.count import CountTool
 from avrokit.tools.stats import StatsTool, Stats
-from avrokit.tools.getmeta import GetMetaTool
 from avrokit.tools.concat import ConcatTool
 from avrokit.tools.cat import CatTool
-from avrokit.tools.getschema import GetSchemaTool
 from avrokit.io import avro_schema, avro_writer, avro_reader
 from avrokit.url.factory import parse_url
 from avrokit.io.writer import PartitionedAvroWriter
@@ -201,11 +197,7 @@ class TestStatsTool:
             url = parse_url(file_path)
 
             tool = StatsTool()
-            stats = Stats()
             tool.run.__self__.run
-
-            from io import StringIO
-            import sys
 
             # Replicate the tool's run logic
             stats_obj = Stats()
@@ -239,7 +231,6 @@ class TestStatsTool:
                 )
                 urls.append(parse_url(file_path))
 
-            tool = StatsTool()
             total_count = 0
             for url in urls:
                 with avro_reader(url) as reader:
@@ -363,7 +354,6 @@ class TestGetMetaTool:
             file_path = create_test_avro_file(tmpdir, "test.avro", schema, [{"id": 1}])
             url = parse_url(file_path)
 
-            tool = GetMetaTool()
             with avro_reader(url.with_mode("rb")) as reader:
                 meta = reader.meta
 
@@ -420,7 +410,6 @@ class TestGetMetaTool:
             file_path = create_test_avro_file(tmpdir, "test.avro", schema, records)
             url = parse_url(file_path)
 
-            tool = GetMetaTool()
             with avro_reader(url.with_mode("rb")) as reader:
                 schema_bytes = reader.meta.get("avro.schema")
                 assert schema_bytes is not None
@@ -461,7 +450,7 @@ class TestConcatTool:
             # check_schema_and_codec returns False for different schemas
             # This causes the fallback to record concat instead of block concat
             result = tool.check_schema_and_codec(urls, "null")
-            assert result == False
+            assert not result
 
             # Verify the tool correctly identifies schema mismatch
             # by checking that it falls back to record concat (not block concat)
@@ -494,7 +483,7 @@ class TestConcatTool:
 
             # check_schema_and_codec should return False
             result = tool.check_schema_and_codec(urls, "null")
-            assert result == False
+            assert not result
 
             # Should fall back to record concat
             tool.concat(urls, output_url, "null")
@@ -533,7 +522,7 @@ class TestConcatTool:
 
             # check_schema_and_codec should return True
             result = tool.check_schema_and_codec(files, "null")
-            assert result == True
+            assert result
 
             # Use block concat (fast path)
             tool.block_concat(files, output_url, "null")

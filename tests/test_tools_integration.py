@@ -10,15 +10,10 @@ import pytest
 import tempfile
 import os
 from avrokit.tools.partition import PartitionTool
-from avrokit.tools.fromparquet import FromParquetTool, parquet_to_avro
+from avrokit.tools.fromparquet import parquet_to_avro
 from avrokit.tools.toparquet import ToParquetTool, avro_to_parquet
 from avrokit.tools.filesort import FileSortTool
-from avrokit.tools.concat import ConcatTool
-from avrokit.tools.cat import CatTool
-from avrokit.tools.getschema import GetSchemaTool
-from avrokit.tools.getmeta import GetMetaTool
 from avrokit.tools.tojson import ToJsonTool
-from avrokit.tools.stats import StatsTool
 from avrokit.io import avro_schema, avro_writer, avro_reader
 from avrokit.url.factory import parse_url
 from faker import Faker
@@ -471,9 +466,10 @@ class TestConcatTool:
             input_url = parse_url(input_pattern)
             output_url = parse_url(output_file)
 
-            with PartitionedAvroReader(
-                input_url.with_mode("rb")
-            ) as reader, avro_writer(output_url.with_mode("wb"), schema) as writer:
+            with (
+                PartitionedAvroReader(input_url.with_mode("rb")) as reader,
+                avro_writer(output_url.with_mode("wb"), schema) as writer,
+            ):
                 for record in reader:
                     writer.append(record)
 
@@ -523,9 +519,10 @@ class TestStressCombinations:
 
             from avrokit.io.reader import PartitionedAvroReader
 
-            with PartitionedAvroReader(
-                partition_url.with_mode("rb")
-            ) as reader, avro_writer(concat_url.with_mode("wb"), schema) as writer:
+            with (
+                PartitionedAvroReader(partition_url.with_mode("rb")) as reader,
+                avro_writer(concat_url.with_mode("wb"), schema) as writer,
+            ):
                 for record in reader:
                     writer.append(record)
 
