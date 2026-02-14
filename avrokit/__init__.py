@@ -77,6 +77,10 @@ Writing Partitioned Files:
     ...             writer.roll()  # Create a new partition file
 """
 
+from importlib.metadata import version
+
+__version__ = version("avrokit")
+
 from .url import URL, FileURL, parse_url, create_url_mapping, flatten_urls
 from .io import (
     Appendable,

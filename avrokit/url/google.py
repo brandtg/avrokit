@@ -107,7 +107,7 @@ class GoogleCloudStorageURL(URL):
             if not blob.exists():
                 return 0
             blob.reload()  # N.b. loads metadata including size
-            return blob.size
+            return blob.size if blob.size is not None else 0
 
     @override
     def open(self) -> IO[Any]:
@@ -119,11 +119,13 @@ class GoogleCloudStorageURL(URL):
         self._current_remote = blob
         self._current_local = tmpfile
         self._current_local_stream = self._current_local
-        # Download to file if r or "rb" mode
-        if "r" in self.mode:
+        # Download to file if r/rb mode, or if append mode (to preserve existing content on failure)
+        if "r" in self.mode or "a" in self.mode:
             # N.b. always writes in binary mode
             blob.download_to_file(tmpfile)
             tmpfile.seek(0)
+            if "a" in self.mode:
+                tmpfile.seek(0, 2)  # Seek to end for append mode
             if "b" not in self.mode:
                 # So if the user wants to read text, we need to decode it
                 self._current_local_stream = io.TextIOWrapper(tmpfile, encoding="utf-8")
