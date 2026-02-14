@@ -77,8 +77,9 @@ Writing Partitioned Files:
     ...             writer.roll()  # Create a new partition file
 """
 
-from .url import URL, parse_url, create_url_mapping
+from .url import URL, FileURL, parse_url, create_url_mapping, flatten_urls
 from .io import (
+    Appendable,
     PartitionedAvroReader,
     PartitionedAvroWriter,
     TimePartitionedAvroWriter,
@@ -88,16 +89,46 @@ from .io import (
     avro_writer,
     avro_records,
     compact_avro_data,
+    read_avro_schema,
+    read_avro_schema_from_first_nonempty_file,
     validate_avro_schema_evolution,
 )
 from .asyncio import DeferredAvroWriter, BlockingQueueAvroReader
+from .tools import (
+    CatTool,
+    ConcatTool,
+    FileSortTool,
+    FromParquetTool,
+    GetMetaTool,
+    GetSchemaTool,
+    HttpServerTool,
+    PartitionTool,
+    RepairTool,
+    StatsTool,
+    ToJsonTool,
+    ToParquetTool,
+)
 
 __all__ = [
+    "Appendable",
     "BlockingQueueAvroReader",
+    "CatTool",
+    "ConcatTool",
     "DeferredAvroWriter",
+    "FileSortTool",
+    "FileURL",
+    "FromParquetTool",
+    "GetMetaTool",
+    "GetSchemaTool",
+    "HttpServerTool",
+    "PartitionTool",
     "PartitionedAvroReader",
     "PartitionedAvroWriter",
+    "RepairTool",
+    "StatsTool",
     "TimePartitionedAvroWriter",
+    "ToJsonTool",
+    "ToParquetTool",
     "URL",
     "add_avro_schema_fields",
     "avro_reader",
@@ -106,6 +137,9 @@ __all__ = [
     "avro_records",
     "compact_avro_data",
     "create_url_mapping",
+    "flatten_urls",
     "parse_url",
+    "read_avro_schema",
+    "read_avro_schema_from_first_nonempty_file",
     "validate_avro_schema_evolution",
 ]

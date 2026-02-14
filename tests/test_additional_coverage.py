@@ -20,7 +20,7 @@ class TestURLHandlerEdgeCases:
         """Test reading from non-existent file."""
         url = parse_url("/tmp/nonexistent_file_12345.avro")
         with pytest.raises(FileNotFoundError):
-            with url.with_mode("rb") as f:
+            with url.with_mode("rb") as _:
                 pass
 
     def test_file_url_exists_check(self):

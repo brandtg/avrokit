@@ -35,7 +35,7 @@ class TestPropertyBasedIO:
             try:
                 url = parse_url(tmp.name)
                 # Write zero records
-                with avro_writer(url.with_mode("wb"), schema) as writer:
+                with avro_writer(url.with_mode("wb"), schema) as _:
                     pass
                 # Read back and verify
                 with avro_reader(url.with_mode("rb")) as reader:
@@ -129,7 +129,6 @@ class TestPropertyBasedIO:
     def test_nested_records_deep(self):
         """Test deeply nested record structures."""
         # Create a deeply nested schema
-        inner_schema = {"name": "value", "type": "int"}
         schema_dict = {
             "type": "record",
             "name": "Level0",
@@ -310,7 +309,7 @@ class TestPartitionedReaderWriter:
         )
         with tempfile.TemporaryDirectory() as tmpdir:
             base_url = parse_url(os.path.join(tmpdir, "output", "*.avro"))
-            with PartitionedAvroWriter(base_url.with_mode("wb"), schema) as writer:
+            with PartitionedAvroWriter(base_url.with_mode("wb"), schema) as _:
                 pass  # Write nothing
 
             # Should create at least one file
@@ -380,7 +379,7 @@ class TestPartitionedReaderWriter:
             # Create multiple empty files
             for i in range(5):
                 file_url = parse_url(os.path.join(tmpdir, f"part-{i:05d}.avro"))
-                with avro_writer(file_url.with_mode("wb"), schema) as writer:
+                with avro_writer(file_url.with_mode("wb"), schema) as _:
                     pass  # Empty
 
             # Read with partitioned reader
