@@ -4,7 +4,7 @@
 
 [tool.poetry]
 name = "avrokit"
-version = "0.0.3"
+version = "0.0.4"
 description = "Python utilities for working with Avro data files"
 authors = ["Greg Brandt <brandt.greg@gmail.com>"]
 license = "Apache-2.0"
