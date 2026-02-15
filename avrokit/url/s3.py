@@ -100,11 +100,7 @@ class S3URL(URL):
             tmpfile.seek(0)
         if "a" in self.mode:
             tmpfile.seek(0, 2)
-            if "b" not in self.mode:
-                # So if the user wants to read text, we need to decode it
-                self._current_local_stream = io.TextIOWrapper(tmpfile, encoding="utf-8")
-        elif ("w" in self.mode or "a" in self.mode) and "b" not in self.mode:
-            # Same thing when we're writing text
+        if "b" not in self.mode:
             self._current_local_stream = io.TextIOWrapper(tmpfile, encoding="utf-8")
         stream = cast(IO[Any], self._current_local_stream)
         return stream
