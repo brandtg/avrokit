@@ -94,11 +94,13 @@ class S3URL(URL):
         self._current_client = client
         self._current_local = tmpfile
         self._current_local_stream = self._current_local
-        # Download to file if "r" or "rb" mode
-        if "r" in self.mode:
+        # Download to file if "r"/"rb" mode, or if append mode (to preserve existing content on failure)
+        if "r" in self.mode or "a" in self.mode:
             # N.b. always writes in binary mode
             client.download_fileobj(self.bucket, self.path, tmpfile)
             tmpfile.seek(0)
+            if "a" in self.mode:
+                tmpfile.seek(0, 2)  # Seek to end for append mode
             if "b" not in self.mode:
                 # So if the user wants to read text, we need to decode it
                 self._current_local_stream = io.TextIOWrapper(tmpfile, encoding="utf-8")
