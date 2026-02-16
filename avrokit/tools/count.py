@@ -47,10 +47,19 @@ class CountTool:
                 # Check sync marker
                 marker = reader.reader.read(16)
                 if marker != sync_marker:
-                    raise avro.errors.AvroException("Sync marker does not match")
+                    raise avro.errors.AvroException(
+                        f"Sync marker does not match (after {total} records)"
+                    )
             except EOFError:
                 break  # End of file reached
             except avro.errors.AvroException as e:
+                if "Sync marker does not match" in str(e):
+                    self.logger.warning(
+                        "File may still be open for writing (sync mismatch after %d records). "
+                        "Counting records up to last valid sync marker.",
+                        total,
+                    )
+                    break
                 if "Read 0 bytes, expected 1 bytes" in str(e):
                     break  # Normal end of file for Avro
                 self.logger.error(f"Avro error while reading block: {e}")
