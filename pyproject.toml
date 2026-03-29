@@ -4,7 +4,7 @@
 
 [project]
 name = "avrokit"
-version = "0.0.6"
+version = "0.0.7"
 description = "Python utilities for working with Avro data files"
 authors = [{ name = "Greg Brandt", email = "brandt.greg@gmail.com" }]
 license = "Apache-2.0"
@@ -60,9 +60,6 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-include = ["avrokit/py.typed"]
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning:botocore.*"]
