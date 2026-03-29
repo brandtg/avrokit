@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-.PHONY: install test test-coverage lint lint-fix typecheck format build publish lock check bump help
+.PHONY: install test test-coverage lint lint-fix typecheck format build publish lock check license-check bump help
 
 help: ## Display this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -40,7 +40,10 @@ bump: ## Bump version: make bump part=patch|minor|major
 lock: ## Update the lockfile
 	uv lock
 
-check: lint typecheck format test ## Run all checks (lint, typecheck, format, test)
+check: lint typecheck format test license-check ## Run all checks (lint, typecheck, format, test)
+
+license-check: ## Check that all files have REUSE license headers
+	uv run reuse lint
 
 license: ## Annotate files with REUSE license headers
 	uv run reuse annotate \
