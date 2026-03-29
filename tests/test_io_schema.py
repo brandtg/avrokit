@@ -4,8 +4,9 @@
 
 import pytest
 from avro.schema import RecordSchema
+
 from avrokit.io import avro_schema
-from avrokit.io.schema import validate_avro_schema_evolution, add_avro_schema_fields
+from avrokit.io.schema import add_avro_schema_fields, validate_avro_schema_evolution
 
 
 @pytest.mark.parametrize(

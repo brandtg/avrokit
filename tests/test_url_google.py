@@ -2,16 +2,18 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import pytest
+import os
+import tempfile
+
 import docker
 import docker.errors
-import tempfile
-import os
-from avrokit.url.factory import parse_url
-from avrokit.url.google import google_cloud_storage_client
-from avrokit.io import avro_schema, avro_writer, avro_reader
+import pytest
 from faker import Faker
 from filelock import FileLock
+
+from avrokit.io import avro_reader, avro_schema, avro_writer
+from avrokit.url.factory import parse_url
+from avrokit.url.google import google_cloud_storage_client
 
 faker = Faker()
 

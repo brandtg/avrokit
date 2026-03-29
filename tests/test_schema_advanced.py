@@ -6,10 +6,13 @@
 Comprehensive tests for Avro schema operations including evolution validation.
 """
 
+from typing import cast
+
 import pytest
+
 from avrokit.io.schema import (
-    avro_schema,
     add_avro_schema_fields,
+    avro_schema,
     flatten_avro_schema_fields,
     validate_avro_schema_evolution,
 )
@@ -384,7 +387,7 @@ class TestAddSchemaFields:
         )
 
         # Verify the new field was added
-        schema_dict = new_schema.to_json()
+        schema_dict = cast(dict, new_schema.to_json())
         assert len(schema_dict["fields"]) == 2
         assert schema_dict["fields"][1]["name"] == "email"
 
@@ -405,7 +408,7 @@ class TestAddSchemaFields:
             ],
         )
 
-        schema_dict = new_schema.to_json()
+        schema_dict = cast(dict, new_schema.to_json())
         assert len(schema_dict["fields"]) == 3
 
 

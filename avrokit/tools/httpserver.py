@@ -2,19 +2,21 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import threading
-from ..io import avro_reader, avro_writer, read_avro_schema, avro_schema
-from ..url import URL, parse_url
-from avro.datafile import DataFileReader
-from avro.io import DatumReader
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse, parse_qs
 import argparse
 import io
-import os
 import json
 import logging
+import os
 import shutil
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import parse_qs, urlparse
+
+from avro.datafile import DataFileReader
+from avro.io import DatumReader
+
+from ..io import avro_reader, avro_schema, avro_writer, read_avro_schema
+from ..url import URL, parse_url
 
 logger = logging.getLogger(__name__)
 
@@ -116,9 +118,10 @@ class AvroHTTPRequestHandler(BaseHTTPRequestHandler):
                     # TODO Don't do this in memory
                     content_length = int(self.headers.get("Content-Length", 0))
                     body = self.rfile.read(content_length)
-                    with DataFileReader(
-                        io.BytesIO(body), DatumReader()
-                    ) as reader, avro_writer(data_url) as writer:
+                    with (
+                        DataFileReader(io.BytesIO(body), DatumReader()) as reader,
+                        avro_writer(data_url) as writer,
+                    ):
                         for record in reader:
                             writer.append(record)
                     self.send_response(200)

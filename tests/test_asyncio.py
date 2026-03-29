@@ -2,13 +2,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from queue import Empty
 import tempfile
 import time
-from avrokit.io import avro_schema, avro_reader, avro_writer
-from avrokit.asyncio import DeferredAvroWriter, BlockingQueueAvroReader
+from queue import Empty
+
 from faker import Faker
 
+from avrokit.asyncio import BlockingQueueAvroReader, DeferredAvroWriter
+from avrokit.io import avro_reader, avro_schema, avro_writer
 from avrokit.url.factory import parse_url
 
 faker = Faker()

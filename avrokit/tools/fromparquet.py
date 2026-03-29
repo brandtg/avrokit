@@ -3,28 +3,30 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
+from collections.abc import Generator
+from typing import Any
+
 import avro.schema
-import pyarrow as pa  # type: ignore
-import pyarrow.parquet as pq  # type: ignore
-from typing import Any, Generator
-from pyarrow.types import (  # type: ignore
-    is_int32,
-    is_int64,
+import pyarrow as pa
+import pyarrow.parquet as pq
+from pyarrow.types import (
+    is_boolean,
+    is_date,
     is_float32,
     is_float64,
-    is_boolean,
-    is_string,
+    is_int32,
+    is_int64,
     is_large_string,
-    is_timestamp,
-    is_date,
-    is_null,
-    is_struct,
-    is_map,
     is_list,
+    is_map,
+    is_null,
+    is_string,
+    is_struct,
+    is_timestamp,
 )
 
 from ..io import avro_schema, avro_writer
-from ..url import parse_url, URL
+from ..url import URL, parse_url
 
 
 def read_parquet_schema(url: URL) -> pa.Schema:
@@ -146,9 +148,11 @@ def parquet_to_avro(
     parquet_schema = read_parquet_schema(input_url)
     schema = parquet_schema_to_avro_schema(parquet_schema, name, namespace)
     # Map the Parquet tables to Avro records
-    with input_url.with_mode("rb") as parquet_stream, pq.ParquetFile(
-        parquet_stream
-    ) as parquet_file, avro_writer(output_url.with_mode("wb"), schema) as writer:
+    with (
+        input_url.with_mode("rb") as parquet_stream,
+        pq.ParquetFile(parquet_stream) as parquet_file,
+        avro_writer(output_url.with_mode("wb"), schema) as writer,
+    ):
         for row_group_index in range(parquet_file.num_row_groups):
             # Load the current row group as a Table
             table = parquet_file.read_row_group(row_group_index)

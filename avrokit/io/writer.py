@@ -3,27 +3,29 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from avro.schema import Schema
-from avrokit.url.utils import flatten_urls
-from ..url import URL
-from avro.datafile import NULL_CODEC, DataFileWriter
-from avro.io import DatumWriter
+
+import os
+import re
+from collections.abc import Generator, Mapping, Sequence
 from contextlib import contextmanager
-from typing import (
-    Generator,
-    IO,
-    Any,
-    Protocol,
-    Self,
-    Sequence,
-    Literal,
-    Mapping,
-)
 from datetime import datetime
 from itertools import groupby
-from datetime_truncate import truncate as truncate_datetime  # type: ignore
-import re
-import os
+from typing import (
+    IO,
+    Any,
+    Literal,
+    Protocol,
+    Self,
+)
+
+from avro.datafile import NULL_CODEC, DataFileWriter
+from avro.io import DatumWriter
+from avro.schema import Schema
+from datetime_truncate import truncate as truncate_datetime
+
+from avrokit.url.utils import flatten_urls
+
+from ..url import URL
 
 
 class Appendable(Protocol):
@@ -51,9 +53,12 @@ def avro_writer(
         raise ValueError("URL must be opened in binary mode.")
     elif url.exists() and url.size() > 0 and "a" in url.mode:
         # N.b. setting writers_schema to None reuses the schema from the existing file
-        with url as f, DataFileWriter(
-            f, DatumWriter(), writers_schema=None, codec=codec
-        ) as writer:
+        with (
+            url as f,
+            DataFileWriter(
+                f, DatumWriter(), writers_schema=None, codec=codec
+            ) as writer,
+        ):
             yield writer
     elif schema is None:
         raise ValueError("Schema must be provided for new files.")
@@ -164,14 +169,14 @@ class TimePartitionedAvroWriter(PartitionedAvroWriter):
     def __init__(self, url: URL, schema: Schema) -> None:
         super().__init__(url, schema)
 
-    @classmethod
-    def next_filename(cls, _: str | None) -> str:
+    @staticmethod
+    def next_filename(previous: str | None) -> str:
         """
         Generates the next filename for the Avro file based on the current time.
 
         :return: The next filename.
         """
-        return datetime.now().strftime(cls.format)
+        return datetime.now().strftime(TimePartitionedAvroWriter.format)
 
     @classmethod
     def group_time_partitions(

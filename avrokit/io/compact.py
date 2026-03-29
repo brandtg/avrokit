@@ -2,16 +2,18 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from collections.abc import Sequence
+
 from avrokit.io.reader import avro_reader
 from avrokit.url.utils import flatten_urls
+
 from ..url import URL
-from .writer import avro_writer
 from .schema import read_avro_schema_from_first_nonempty_file
-from typing import Union, Sequence
+from .writer import avro_writer
 
 
 def compact_avro_data(
-    src: Union[URL, Sequence[URL]],
+    src: URL | Sequence[URL],
     dst: URL,
     expand_src: bool = True,
 ) -> None:

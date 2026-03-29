@@ -5,8 +5,9 @@
 import argparse
 import json
 import sys
+
 from ..io import avro_reader
-from ..url import parse_url, flatten_urls
+from ..url import flatten_urls, parse_url
 
 
 class ToJsonTool:

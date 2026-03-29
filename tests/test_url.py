@@ -2,10 +2,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import pytest
-import tempfile
 import os
-from avrokit.url import parse_url, FileURL, create_url_mapping
+import tempfile
+
+import pytest
+
+from avrokit.url import FileURL, create_url_mapping, parse_url
 from avrokit.url.utils import flatten_urls
 
 

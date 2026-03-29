@@ -3,33 +3,56 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from ..url import URL
+
+from collections.abc import Generator, Iterator, Sequence
+from contextlib import contextmanager
+from typing import IO, Any, Self, cast
+
 from avro.datafile import DataFileReader
 from avro.io import DatumReader
-from contextlib import contextmanager
-from typing import Generator, Iterator, Sequence, IO, Any, Self, Union, cast
+
+from ..url import URL
 
 
 @contextmanager
-def avro_reader(url: URL) -> Generator[DataFileReader, None, None]:
+def avro_reader(url: URL) -> Generator[TypedDataFileReader, None, None]:
     """
     Opens an Avro DataFileReader for the given URL.
 
     :param url: The URL of the Avro file to read.
-    :return: A DataFileReader object.
+    :return: A TypedDataFileReader object.
     """
     with url as f, DataFileReader(f, DatumReader()) as reader:
-        yield reader
+        yield TypedDataFileReader(reader)
+
+
+class TypedDataFileReader:
+    """Wraps DataFileReader to provide typed iteration over records."""
+
+    def __init__(self, reader: DataFileReader) -> None:
+        self._reader = reader
+
+    def tell(self) -> int:
+        """Returns the current position in the underlying file stream."""
+        return self._reader._reader.tell()  # type: ignore[union-attr]
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._reader, name)
+
+    def __iter__(self) -> Iterator[dict[str, Any]]:
+        return self
+
+    def __next__(self) -> dict[str, Any]:
+        return cast(dict[str, Any], next(self._reader))
 
 
 def avro_records(url: URL) -> Generator[dict[str, Any], None, None]:
     with avro_reader(url) as reader:
-        for record in reader:
-            yield cast(dict[str, Any], record)
+        yield from reader
 
 
 class PartitionedAvroReader:
-    def __init__(self, urls: Union[URL, Sequence[URL]]):
+    def __init__(self, urls: URL | Sequence[URL]):
         self.urls = [urls] if isinstance(urls, URL) else urls
         self.expanded_urls: list[URL] = []
         self.current_index = 0
@@ -70,15 +93,15 @@ class PartitionedAvroReader:
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
-    def __iter__(self) -> Iterator[object]:
+    def __iter__(self) -> Iterator[dict[str, Any]]:
         return self
 
-    def __next__(self) -> object:
+    def __next__(self) -> dict[str, Any]:
         while True:
             try:
                 if not self.current_reader:
                     raise StopIteration
-                return next(self.current_reader)
+                return cast(dict[str, Any], next(self.current_reader))
             except StopIteration:
                 self.current_index += 1
                 self._open_reader()

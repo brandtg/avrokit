@@ -5,11 +5,13 @@
 import io
 import os
 import tempfile
+from collections.abc import Generator, Sequence
+from contextlib import contextmanager
+from typing import IO, Any, cast, override
+
 from google.api_core.exceptions import NotFound
 from google.auth.credentials import AnonymousCredentials
-from google.cloud import storage  # type: ignore
-from typing import Any, Sequence, cast, override, IO
-from contextlib import contextmanager
+from google.cloud import storage
 
 from .base import URL
 
@@ -32,7 +34,7 @@ def _create_client() -> storage.Client:
 
 
 @contextmanager
-def google_cloud_storage_client() -> storage.Client:
+def google_cloud_storage_client() -> Generator[storage.Client, None, None]:
     client = _create_client()
     try:
         yield client

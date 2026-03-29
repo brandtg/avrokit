@@ -2,8 +2,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from .base import URL
 from urllib.parse import urlparse
+
+from .base import URL
 
 
 def parse_url(url: str, mode: str = "rb") -> URL:

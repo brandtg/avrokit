@@ -4,11 +4,14 @@
 
 import argparse
 import logging
-import avro.errors
+from collections.abc import Sequence
+
 import avro.datafile
-from typing import Sequence
+import avro.errors
+
 from ..io import avro_reader
-from ..url import parse_url, flatten_urls, URL
+from ..io.reader import TypedDataFileReader
+from ..url import URL, flatten_urls, parse_url
 
 
 class CountTool:
@@ -32,7 +35,9 @@ class CountTool:
             help="URL of the input Avro data file(s).",
         )
 
-    def fast_count_records(self, reader: avro.datafile.DataFileReader) -> int:
+    def fast_count_records(
+        self, reader: avro.datafile.DataFileReader | TypedDataFileReader
+    ) -> int:
         reader._read_header()
         sync_marker = reader.sync_marker
         total = 0

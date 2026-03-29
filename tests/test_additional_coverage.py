@@ -6,9 +6,11 @@
 Additional tests for URL handlers and other edge cases.
 """
 
-import pytest
-import tempfile
 import os
+import tempfile
+
+import pytest
+
 from avrokit.io import avro_schema
 from avrokit.url.factory import parse_url
 
@@ -203,7 +205,7 @@ class TestCompactOperation:
             output_url = parse_url(output_file)
 
             # Write data
-            from avrokit.io import avro_writer, avro_reader
+            from avrokit.io import avro_reader, avro_writer
 
             with avro_writer(input_url.with_mode("wb"), schema) as writer:
                 for i in range(10):

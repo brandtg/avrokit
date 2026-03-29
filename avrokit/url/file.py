@@ -2,11 +2,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from .base import URL
-from typing import Any, Sequence, override, IO
+import glob
 import os
 import shutil
-import glob
+from collections.abc import Sequence
+from typing import IO, Any, override
+
+from .base import URL
 
 
 class FileURL(URL):

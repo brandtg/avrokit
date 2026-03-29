@@ -5,12 +5,15 @@
 import argparse
 import logging
 import random
-from typing import Sequence
+from collections.abc import Sequence
+
 from avro.schema import Schema
+
 from avrokit.io.schema import read_avro_schema_from_first_nonempty_file
 from avrokit.io.writer import avro_writer
+
 from ..io import avro_reader
-from ..url import parse_url, flatten_urls, URL
+from ..url import URL, flatten_urls, parse_url
 
 
 class CatTool:

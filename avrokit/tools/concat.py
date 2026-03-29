@@ -5,13 +5,16 @@
 import argparse
 import logging
 import struct
-from typing import Sequence, Tuple
+from collections.abc import Sequence
+
 from avro.datafile import DataFileReader
-from avro.io import DatumReader, BinaryDecoder, BinaryEncoder
+from avro.io import BinaryDecoder, BinaryEncoder, DatumReader
+
 from avrokit.io.schema import read_avro_schema_from_first_nonempty_file
 from avrokit.io.writer import avro_writer
+
 from ..io import avro_reader
-from ..url import parse_url, flatten_urls, URL
+from ..url import URL, flatten_urls, parse_url
 
 
 class ConcatTool:
@@ -143,7 +146,7 @@ class ConcatTool:
                         except (StopIteration, EOFError, struct.error):
                             break
 
-    def get_schema_and_codec(self, url: URL) -> Tuple[bytes | None, bytes | None]:
+    def get_schema_and_codec(self, url: URL) -> tuple[bytes | None, bytes | None]:
         with avro_reader(url) as reader:
             schema = reader.meta.get("avro.schema")
             codec = reader.meta.get("avro.codec", b"null")

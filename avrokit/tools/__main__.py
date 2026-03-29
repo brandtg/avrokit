@@ -4,23 +4,23 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import logging
 import argparse
+import logging
 
 from .base import Tool
-from .stats import StatsTool
-from .getschema import GetSchemaTool
-from .tojson import ToJsonTool
-from .concat import ConcatTool
 from .cat import CatTool
-from .getmeta import GetMetaTool
-from .repair import RepairTool
-from .httpserver import HttpServerTool
-from .toparquet import ToParquetTool
-from .fromparquet import FromParquetTool
-from .partition import PartitionTool
-from .filesort import FileSortTool
+from .concat import ConcatTool
 from .count import CountTool
+from .filesort import FileSortTool
+from .fromparquet import FromParquetTool
+from .getmeta import GetMetaTool
+from .getschema import GetSchemaTool
+from .httpserver import HttpServerTool
+from .partition import PartitionTool
+from .repair import RepairTool
+from .stats import StatsTool
+from .tojson import ToJsonTool
+from .toparquet import ToParquetTool
 
 # TODO fromjson  Reads JSON records and writes an Avro data file. (requires --schema or --schema-file)
 # TODO Infer schema tool

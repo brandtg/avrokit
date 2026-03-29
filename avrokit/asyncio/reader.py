@@ -2,10 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import threading
 import logging
 import queue
-from typing import Iterable
+import threading
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class BlockingQueueAvroReader:
     Reads
     """
 
-    def __init__(self, data: Iterable[object], daemon: bool = True) -> None:
+    def __init__(self, data: Any, daemon: bool = True) -> None:
         self.data = data
         self._reader_queue: queue.Queue = queue.Queue()
         self._reader_thread_done = threading.Event()

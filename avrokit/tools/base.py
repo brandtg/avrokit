@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Protocol
 import argparse
+from typing import Protocol
 
 
 class Tool(Protocol):

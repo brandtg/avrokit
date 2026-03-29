@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from ..io import avro_reader
-from ..url import parse_url, flatten_urls
-from dataclasses import dataclass, field, asdict
-from typing import Any, cast
 import argparse
 import json
 import logging
 import sys
+from dataclasses import asdict, dataclass, field
+
+from ..io import avro_reader
+from ..url import flatten_urls, parse_url
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,6 @@ class StatsTool:
             # Read Avro file
             with avro_reader(url) as reader:
                 for record in reader:
-                    record = cast(dict[str, Any], record)
                     # Count total records
                     stats.count += 1
                     # Count records by file

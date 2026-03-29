@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from .compact import compact_avro_data
+from .reader import PartitionedAvroReader, avro_reader, avro_records
 from .schema import (
     add_avro_schema_fields,
     avro_schema,
@@ -9,14 +11,12 @@ from .schema import (
     read_avro_schema_from_first_nonempty_file,
     validate_avro_schema_evolution,
 )
-from .reader import avro_reader, PartitionedAvroReader, avro_records
 from .writer import (
-    avro_writer,
     Appendable,
     PartitionedAvroWriter,
     TimePartitionedAvroWriter,
+    avro_writer,
 )
-from .compact import compact_avro_data
 
 __all__ = [
     "Appendable",

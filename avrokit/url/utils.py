@@ -2,9 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Sequence, Union
-from avrokit.url.base import URL
 import os
+from collections.abc import Sequence
+
+from avrokit.url.base import URL
 
 
 def create_url_mapping(src: URL, dst: URL) -> Sequence[tuple[URL, URL]]:
@@ -30,7 +31,7 @@ def create_url_mapping(src: URL, dst: URL) -> Sequence[tuple[URL, URL]]:
 
 
 def flatten_urls(
-    urls: Union[None, URL, Sequence[URL | None]], expand: bool = True
+    urls: None | URL | Sequence[URL | None], expand: bool = True
 ) -> Sequence[URL]:
     """
     Flatten a list of URLs, removing None values and expanding if needed.

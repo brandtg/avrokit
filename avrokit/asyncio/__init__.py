@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from .writer import DeferredAvroWriter
 from .reader import BlockingQueueAvroReader
+from .writer import DeferredAvroWriter
 
 __all__ = [
     "DeferredAvroWriter",
