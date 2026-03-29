@@ -2,11 +2,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from .base import URL
-from typing import Any, Sequence, override, IO
-import tempfile
 import io
+import tempfile
+from collections.abc import Sequence
+from typing import IO, Any, override
+
 import requests
+
+from .base import URL
 
 
 class HttpURL(URL):

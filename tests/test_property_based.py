@@ -7,14 +7,16 @@ Property-based tests using hypothesis to stress test the avrokit library.
 These tests generate random inputs to surface edge cases and bugs.
 """
 
-import pytest
-import tempfile
 import os
-from avrokit.io import avro_schema, avro_reader, avro_writer
+import tempfile
+
+import pytest
+from faker import Faker
+
+from avrokit.io import avro_reader, avro_schema, avro_writer
 from avrokit.io.reader import PartitionedAvroReader
 from avrokit.io.writer import PartitionedAvroWriter
 from avrokit.url.factory import parse_url
-from faker import Faker
 
 faker = Faker()
 

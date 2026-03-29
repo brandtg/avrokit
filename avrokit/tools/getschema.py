@@ -5,6 +5,7 @@
 import argparse
 import json
 import sys
+
 from ..io import read_avro_schema_from_first_nonempty_file
 from ..url import parse_url
 

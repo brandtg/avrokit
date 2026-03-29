@@ -6,18 +6,21 @@
 Integration tests for command-line tools in avrokit.
 """
 
-import pytest
-import tempfile
-import os
-from avrokit.tools.partition import PartitionTool
-from avrokit.tools.fromparquet import parquet_to_avro
-from avrokit.tools.toparquet import ToParquetTool, avro_to_parquet
-from avrokit.tools.filesort import FileSortTool
-from avrokit.tools.tojson import ToJsonTool
-from avrokit.io import avro_schema, avro_writer, avro_reader
-from avrokit.url.factory import parse_url
-from faker import Faker
 import json
+import os
+import tempfile
+from typing import cast
+
+import pytest
+from faker import Faker
+
+from avrokit.io import avro_reader, avro_schema, avro_writer
+from avrokit.tools.filesort import FileSortTool
+from avrokit.tools.fromparquet import parquet_to_avro
+from avrokit.tools.partition import PartitionTool
+from avrokit.tools.tojson import ToJsonTool
+from avrokit.tools.toparquet import ToParquetTool, avro_to_parquet
+from avrokit.url.factory import parse_url
 
 faker = Faker()
 
@@ -58,7 +61,9 @@ class TestPartitionTool:
             output_dir = os.path.join(tmpdir, "output")
             assert os.path.exists(output_dir)
             files = sorted(os.listdir(output_dir))
-            assert len(files) >= 2  # Should create at least 2 partitions
+            # Exactly 3 partitions requested; the tool splits by byte size so we
+            # expect at least 2 and no more than 100 (one per record).
+            assert 2 <= len(files) <= 100
 
             # Read back all records
             from avrokit.io.reader import PartitionedAvroReader
@@ -66,6 +71,45 @@ class TestPartitionTool:
             with PartitionedAvroReader(output_url.with_mode("rb")) as reader:
                 records = list(reader)
                 assert len(records) == 100
+
+    def test_partition_reader_tell_advances(self):
+        """tell() on the reader inside partition_avro must return non-zero advancing values.
+
+        This exercises the reader.tell() code path changed from reader._reader.tell().
+        """
+        schema = avro_schema(
+            {
+                "type": "record",
+                "name": "Test",
+                "fields": [
+                    {"name": "id", "type": "int"},
+                    {"name": "value", "type": "string"},
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_file = os.path.join(tmpdir, "input.avro")
+            input_url = parse_url(input_file)
+
+            with avro_writer(input_url.with_mode("wb"), schema) as writer:
+                for i in range(20):
+                    writer.append({"id": i, "value": f"value_{i}"})
+
+            # Collect tell() positions directly via avro_reader to verify the
+            # method returns meaningful values (positive, non-decreasing).
+            from avrokit.io import avro_reader
+
+            positions = []
+            with avro_reader(input_url.with_mode("rb")) as reader:
+                for _ in reader:
+                    positions.append(reader.tell())
+
+            assert len(positions) == 20
+            assert positions[0] > 0, "tell() must return a positive value after reading"
+            assert positions == sorted(positions), (
+                "tell() positions must be non-decreasing"
+            )
 
     def test_partition_force_overwrite(self):
         """Test force overwrite functionality."""
@@ -393,7 +437,7 @@ class TestToJsonTool:
                     sys.stdout = old_stdout
 
             # Verify JSON output
-            with open(json_file, "r") as f:
+            with open(json_file) as f:
                 lines = f.readlines()
                 assert len(lines) == 5
                 for i, line in enumerate(lines):
@@ -427,9 +471,11 @@ class TestGetSchemaTool:
                 writer.append({"id": 1, "name": "test"})
 
             # Get schema
+            from avro.schema import RecordSchema
+
             from avrokit.io import read_avro_schema
 
-            extracted_schema = read_avro_schema(avro_url)
+            extracted_schema = cast(RecordSchema, read_avro_schema(avro_url))
 
             assert extracted_schema.name == "TestRecord"
             assert extracted_schema.namespace == "com.example"

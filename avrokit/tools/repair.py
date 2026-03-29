@@ -2,20 +2,24 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import tempfile
-from avro.datafile import DataFileReader
-from avro.io import BinaryDecoder, DatumReader
-from avro.schema import Schema
-from avrokit import avro_writer
-from avrokit.url import create_url_mapping
-from dataclasses import dataclass
-from typing import IO, Literal, Tuple, Sequence
 import argparse
 import io
 import json
 import logging
 import sys
-from ..url import parse_url, URL
+import tempfile
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import IO, Literal
+
+from avro.datafile import DataFileReader
+from avro.io import BinaryDecoder, DatumReader
+from avro.schema import Schema
+
+from avrokit import avro_writer
+from avrokit.url import create_url_mapping
+
+from ..url import URL, parse_url
 
 SYNC_SIZE = 16
 
@@ -70,7 +74,7 @@ class RepairTool:
             shift += 7
         return (result >> 1) ^ -(result & 1)  # Decode the zig-zag encoding
 
-    def read_header(self, fh: IO[bytes]) -> Tuple[Schema, str, bytes]:
+    def read_header(self, fh: IO[bytes]) -> tuple[Schema, str, bytes]:
         """
         Read the Avro file header to extract the schema, codec, and sync marker.
         """
@@ -81,7 +85,7 @@ class RepairTool:
         codec = header_reader.codec
         if codec != "null":
             # TODO Support other codecs
-            raise ValueError("Unsupported codec: {}".format(codec))
+            raise ValueError(f"Unsupported codec: {codec}")
         sync_marker = header_reader.sync_marker
         return schema, codec, sync_marker
 

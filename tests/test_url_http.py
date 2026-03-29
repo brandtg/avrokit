@@ -2,12 +2,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import pytest
-import tempfile
 import http.server
-import socketserver
-import threading
 import os
+import socketserver
+import tempfile
+import threading
+
+import pytest
 
 from avrokit.url.factory import parse_url
 

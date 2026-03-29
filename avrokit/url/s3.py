@@ -2,13 +2,16 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import boto3
-import tempfile
 import io
-from mypy_boto3_s3 import S3Client
-from .base import URL
-from typing import Any, Sequence, override, IO, cast
+import tempfile
+from collections.abc import Sequence
 from contextlib import contextmanager
+from typing import IO, Any, cast, override
+
+import boto3
+from mypy_boto3_s3 import S3Client
+
+from .base import URL
 
 
 @contextmanager

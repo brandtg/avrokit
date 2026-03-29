@@ -6,18 +6,20 @@
 High-priority tests based on coverage analysis from TEST_PLAN.md.
 """
 
-import pytest
-import tempfile
 import os
-from avrokit.tools.count import CountTool
-from avrokit.tools.stats import StatsTool, Stats
-from avrokit.tools.concat import ConcatTool
-from avrokit.tools.cat import CatTool
-from avrokit.io import avro_schema, avro_writer, avro_reader
-from avrokit.url.factory import parse_url
-from avrokit.io.writer import PartitionedAvroWriter
+import tempfile
+
+import pytest
+
 from avrokit.asyncio.reader import BlockingQueueAvroReader
 from avrokit.asyncio.writer import DeferredAvroWriter
+from avrokit.io import avro_reader, avro_schema, avro_writer
+from avrokit.io.writer import PartitionedAvroWriter
+from avrokit.tools.cat import CatTool
+from avrokit.tools.concat import ConcatTool
+from avrokit.tools.count import CountTool
+from avrokit.tools.stats import Stats, StatsTool
+from avrokit.url.factory import parse_url
 
 
 def create_test_avro_file(tmpdir, filename, schema, records, codec="null"):
@@ -169,6 +171,34 @@ class TestCountTool:
                 count = tool.fast_count_records(reader)
 
             assert count == 25
+
+    def test_fast_count_records_with_raw_data_file_reader(self):
+        """fast_count_records must also accept a raw DataFileReader (the other branch of its union type)."""
+        schema = avro_schema(
+            {
+                "type": "record",
+                "name": "Test",
+                "fields": [{"name": "id", "type": "int"}],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            file_path = create_test_avro_file(
+                tmpdir, "test.avro", schema, [{"id": i} for i in range(10)]
+            )
+            url = parse_url(file_path)
+
+            # Construct a raw DataFileReader without going through avro_reader()
+            from avro.datafile import DataFileReader
+            from avro.io import DatumReader
+
+            with url.with_mode("rb") as f:
+                raw_reader = DataFileReader(f, DatumReader())
+                tool = CountTool()
+                count = tool.fast_count_records(raw_reader)
+                raw_reader.close()
+
+            assert count == 10
 
 
 class TestStatsTool:
@@ -839,11 +869,15 @@ class TestGetSchemaTool:
             file_path = create_test_avro_file(tmpdir, "test.avro", schema, records)
             url = parse_url(file_path)
 
+            from typing import cast
+
+            from avro.schema import RecordSchema
+
             from avrokit.io.schema import read_avro_schema_from_first_nonempty_file
 
             extracted = read_avro_schema_from_first_nonempty_file([url])
             assert extracted is not None
-            assert extracted.name == "Test"
+            assert cast(RecordSchema, extracted).name == "Test"
             json_schema = extracted.to_json()
             assert "Data" in str(json_schema)
             assert "Status" in str(json_schema)

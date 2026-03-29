@@ -2,40 +2,48 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-.PHONY: install env test test-coverage lint typecheck format build publish lock
+.PHONY: install test test-coverage lint lint-fix typecheck format build publish lock check bump help
 
-install:
-	poetry install --with dev --extras all
+help: ## Display this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-env:
-	poetry env use python3.12
+install: ## Install all dependencies including extras and dev group
+	uv sync --extra all --group dev
 
-build:
-	poetry build
+build: ## Build the package
+	uv build
 
-publish:
-	poetry publish
+publish: ## Publish the package to PyPI
+	uv publish
 
-test:
-	poetry run pytest -n auto
+test: ## Run tests in parallel
+	uv run pytest -n auto
 
-test-coverage:
-	poetry run pytest -n auto --cov=. --cov-report=term
+test-coverage: ## Run tests with coverage report
+	uv run pytest -n auto --cov=. --cov-report=term
 
-lint:
-	poetry run flake8 .
+lint: ## Run ruff linter
+	uv run ruff check .
 
-typecheck:
-	poetry run mypy .
+lint-fix: ## Run ruff linter and apply fixes
+	uv run ruff check --fix .
 
-format:
-	poetry run black .
+typecheck: ## Run type checker
+	uv run ty check
 
-lock:
-	poetry lock
+format: ## Format code with ruff
+	uv run ruff format .
 
-license:
-	poetry run reuse annotate \
+bump: ## Bump version: make bump part=patch|minor|major
+	uv version --bump $(part)
+
+lock: ## Update the lockfile
+	uv lock
+
+check: lint typecheck format test ## Run all checks (lint, typecheck, format, test)
+
+license: ## Annotate files with REUSE license headers
+	uv run reuse annotate \
 		--license Apache-2.0 \
 		--copyright "Greg Brandt <brandt.greg@gmail.com>" \
 		--skip-unrecognized \

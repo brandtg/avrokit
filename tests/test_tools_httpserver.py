@@ -2,16 +2,18 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from avrokit.io import avro_writer, avro_schema
+import json
+import tempfile
+import threading
+
+import pytest
+import requests
+from faker import Faker
+
+from avrokit.io import avro_schema, avro_writer
 from avrokit.io.reader import avro_reader
 from avrokit.tools import HttpServerTool
 from avrokit.url import parse_url
-from faker import Faker
-import json
-import pytest
-import requests
-import tempfile
-import threading
 
 faker = Faker()
 

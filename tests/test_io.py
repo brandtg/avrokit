@@ -2,17 +2,19 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import pytest
-import tempfile
 import os
-from avrokit.io import avro_schema, avro_reader, avro_writer
-from avrokit.io.compact import compact_avro_data
-from avrokit.io.reader import PartitionedAvroReader
-from avrokit.io.writer import PartitionedAvroWriter, TimePartitionedAvroWriter
-from avrokit.url.factory import parse_url
+import tempfile
+from datetime import datetime
+
+import pytest
 from faker import Faker
 from freezegun import freeze_time
-from datetime import datetime
+
+from avrokit.io import avro_reader, avro_schema, avro_writer
+from avrokit.io.compact import compact_avro_data
+from avrokit.io.reader import PartitionedAvroReader, TypedDataFileReader
+from avrokit.io.writer import PartitionedAvroWriter, TimePartitionedAvroWriter
+from avrokit.url.factory import parse_url
 
 faker = Faker()
 
@@ -112,6 +114,83 @@ class TestSingleFileIO:
                     assert len(record["emails"]) == 3
                     count += 1
                 assert count == 200
+
+
+class TestTypedDataFileReader:
+    """Tests for the TypedDataFileReader wrapper introduced to provide typed iteration."""
+
+    SCHEMA = avro_schema(
+        {
+            "type": "record",
+            "name": "Item",
+            "fields": [
+                {"name": "id", "type": "int"},
+                {"name": "label", "type": "string"},
+            ],
+        }
+    )
+
+    def _write_records(self, path: str, n: int = 5) -> None:
+        url = parse_url(path).with_mode("wb")
+        with avro_writer(url, self.SCHEMA) as writer:
+            for i in range(n):
+                writer.append({"id": i, "label": f"item-{i}"})
+
+    def test_avro_reader_yields_typed_reader(self):
+        """avro_reader context manager must yield a TypedDataFileReader instance."""
+        with tempfile.NamedTemporaryFile(suffix=".avro") as tmp:
+            self._write_records(tmp.name)
+            url = parse_url(tmp.name).with_mode("rb")
+            with avro_reader(url) as reader:
+                assert isinstance(reader, TypedDataFileReader)
+
+    def test_iteration_yields_dicts(self):
+        """Iterating a TypedDataFileReader must yield dict records."""
+        with tempfile.NamedTemporaryFile(suffix=".avro") as tmp:
+            self._write_records(tmp.name, n=3)
+            url = parse_url(tmp.name).with_mode("rb")
+            with avro_reader(url) as reader:
+                records = list(reader)
+            assert len(records) == 3
+            for record in records:
+                assert isinstance(record, dict)
+                assert "id" in record
+                assert "label" in record
+
+    def test_tell_returns_positive_int_after_reads(self):
+        """tell() must return a positive integer that advances as records are read."""
+        with tempfile.NamedTemporaryFile(suffix=".avro") as tmp:
+            self._write_records(tmp.name, n=5)
+            url = parse_url(tmp.name).with_mode("rb")
+            with avro_reader(url) as reader:
+                positions = []
+                for _ in reader:
+                    positions.append(reader.tell())
+            assert len(positions) == 5
+            assert all(isinstance(p, int) for p in positions)
+            # Position must be positive (we've read past the Avro header)
+            assert positions[0] > 0
+            # Position must be non-decreasing
+            assert positions == sorted(positions)
+
+    def test_getattr_delegates_schema(self):
+        """__getattr__ must delegate attribute access to the underlying DataFileReader."""
+        with tempfile.NamedTemporaryFile(suffix=".avro") as tmp:
+            self._write_records(tmp.name)
+            url = parse_url(tmp.name).with_mode("rb")
+            with avro_reader(url) as reader:
+                # .schema is a property on DataFileReader; accessed via __getattr__
+                schema_str = reader.schema
+                assert "Item" in schema_str
+
+    def test_getattr_raises_on_unknown_attribute(self):
+        """Accessing a nonexistent attribute must raise AttributeError."""
+        with tempfile.NamedTemporaryFile(suffix=".avro") as tmp:
+            self._write_records(tmp.name)
+            url = parse_url(tmp.name).with_mode("rb")
+            with avro_reader(url) as reader:
+                with pytest.raises(AttributeError):
+                    _ = reader.this_attribute_does_not_exist
 
 
 class TestPartitionedAvroReader:
@@ -223,6 +302,16 @@ class TestTimePartitionedAvroWriter:
             TimePartitionedAvroWriter.next_filename("2025-01-01_11-00-00")
             == "2025-01-01_12-00-00"
         )
+
+    @freeze_time(datetime(2025, 1, 1, 12, 0, 0))
+    def test_next_filename_via_instance(self):
+        """next_filename must work when called on an instance (staticmethod behaviour)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            url = parse_url(f"{tmp}/*.avro").with_mode("wb")
+            writer = TimePartitionedAvroWriter(url, SCHEMA)
+            # Calling via an instance should behave identically to calling via the class
+            assert writer.next_filename(None) == "2025-01-01_12-00-00"
+            assert writer.next_filename("2025-01-01_11-00-00") == "2025-01-01_12-00-00"
 
     def test_group_time_partitions(self):
         urls = [

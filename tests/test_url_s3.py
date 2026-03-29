@@ -4,10 +4,11 @@
 
 import boto3
 import pytest
-from avrokit.url import parse_url
-from avrokit.io import avro_schema, avro_writer, avro_reader
-from moto import mock_aws
 from faker import Faker
+from moto import mock_aws
+
+from avrokit.io import avro_reader, avro_schema, avro_writer
+from avrokit.url import parse_url
 
 faker = Faker()
 

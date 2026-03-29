@@ -3,16 +3,20 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
-import tempfile
-import os
 import heapq
-from typing import Callable, Any
+import os
+import tempfile
+from collections.abc import Callable
+from typing import Any
+
 from avro.datafile import DataFileReader
 from avro.io import DatumReader
 from avro.schema import Schema
+
 from avrokit.io.reader import avro_reader
 from avrokit.io.writer import avro_writer
-from ..url import parse_url, URL
+
+from ..url import URL, parse_url
 
 DEFAULT_BATCH_SIZE = 1000
 

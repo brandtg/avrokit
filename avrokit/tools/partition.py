@@ -4,12 +4,13 @@
 
 import argparse
 import logging
-from ..url import URL, parse_url
+
 from ..io import (
+    PartitionedAvroWriter,
     avro_reader,
     read_avro_schema_from_first_nonempty_file,
-    PartitionedAvroWriter,
 )
+from ..url import URL, parse_url
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,7 @@ class PartitionTool:
                         # Write the record to the output URL
                         writer.append(record)
                         # Track the current partition size
-                        pos_cur = reader._reader.tell()
+                        pos_cur = reader.tell()
                         record_size = pos_cur - pos_last
                         size_cur += record_size
                         pos_last = pos_cur

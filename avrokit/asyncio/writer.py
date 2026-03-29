@@ -2,9 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import threading
 import logging
 import queue
+import threading
+
 from avrokit.io.writer import Appendable
 
 logger = logging.getLogger(__name__)

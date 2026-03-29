@@ -2,9 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-import pytest
-import tempfile
 import os
+import tempfile
+
+import pytest
+
 from avrokit.url.file import FileURL
 
 

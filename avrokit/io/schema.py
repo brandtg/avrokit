@@ -3,10 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
-from typing import Sequence, Union, Any
-from avro.schema import Field, RecordSchema, Schema, UnionSchema, parse, EnumSchema
-from avro.io import DatumReader
+from collections.abc import Sequence
+from typing import Any, cast
+
 from avro.datafile import DataFileReader
+from avro.io import DatumReader
+from avro.schema import EnumSchema, Field, RecordSchema, Schema, UnionSchema, parse
+
 from ..url import URL
 
 
@@ -28,7 +31,7 @@ def read_avro_schema_from_first_nonempty_file(urls: Sequence[URL]) -> Schema | N
     return None
 
 
-def avro_schema(schema: Union[str, dict]) -> Schema:
+def avro_schema(schema: str | dict) -> Schema:
     """
     Converts a dictionary schema to an Avro Schema object.
 
@@ -48,7 +51,7 @@ def add_avro_schema_fields(schema: Schema, fields: Sequence[dict[str, Any]]) -> 
     schema_dict = schema.to_json()
     if not isinstance(schema_dict, dict):
         raise ValueError("Schema is not a valid Avro record schema.")
-    schema_dict["fields"].extend(fields)
+    cast(dict[str, Any], schema_dict)["fields"].extend(fields)
     return avro_schema(schema_dict)
 
 

@@ -81,7 +81,7 @@ from importlib.metadata import version
 
 __version__ = version("avrokit")
 
-from .url import URL, FileURL, parse_url, create_url_mapping, flatten_urls
+from .asyncio import BlockingQueueAvroReader, DeferredAvroWriter
 from .io import (
     Appendable,
     PartitionedAvroReader,
@@ -89,15 +89,14 @@ from .io import (
     TimePartitionedAvroWriter,
     add_avro_schema_fields,
     avro_reader,
+    avro_records,
     avro_schema,
     avro_writer,
-    avro_records,
     compact_avro_data,
     read_avro_schema,
     read_avro_schema_from_first_nonempty_file,
     validate_avro_schema_evolution,
 )
-from .asyncio import DeferredAvroWriter, BlockingQueueAvroReader
 from .tools import (
     CatTool,
     ConcatTool,
@@ -112,6 +111,7 @@ from .tools import (
     ToJsonTool,
     ToParquetTool,
 )
+from .url import URL, FileURL, create_url_mapping, flatten_urls, parse_url
 
 __all__ = [
     "Appendable",

@@ -2,13 +2,15 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from ..io import read_avro_schema, avro_reader
-from ..url import parse_url, URL
-from typing import cast
 import argparse
-import avro.schema  # type: ignore
-import pyarrow as pa  # type: ignore
-import pyarrow.parquet as pq  # type: ignore
+from typing import cast
+
+import avro.schema
+import pyarrow as pa
+import pyarrow.parquet as pq
+
+from ..io import avro_reader, read_avro_schema
+from ..url import URL, parse_url
 
 DEFAULT_BATCH_SIZE = 1000
 
@@ -84,9 +86,11 @@ def avro_to_parquet(
         raise ValueError("Avro schema must be a record schema.")
     parquet_schema = avro_schema_to_parquet_schema(avro_schema)
     # Map the Avro records to Parquet records in batches
-    with avro_reader(input_url.with_mode("rb")) as reader, output_url.with_mode(
-        "wb"
-    ) as parquet_stream, pq.ParquetWriter(parquet_stream, parquet_schema) as writer:
+    with (
+        avro_reader(input_url.with_mode("rb")) as reader,
+        output_url.with_mode("wb") as parquet_stream,
+        pq.ParquetWriter(parquet_stream, parquet_schema) as writer,
+    ):
         batch = []
         for record in reader:
             # Convert Avro record to Parquet record

@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
+
 from avrokit.io.reader import avro_reader
+
 from ..url import parse_url
 
 
