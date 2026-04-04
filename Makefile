@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-.PHONY: install test test-coverage lint lint-fix typecheck format build publish lock check license-check bump help
+.PHONY: install test test-coverage lint fix typecheck format build publish lock check license-check bump help
 
 help: ## Display this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -25,9 +25,6 @@ test-coverage: ## Run tests with coverage report
 lint: ## Run ruff linter
 	uv run ruff check .
 
-lint-fix: ## Run ruff linter and apply fixes
-	uv run ruff check --fix .
-
 typecheck: ## Run type checker
 	uv run ty check
 
@@ -39,6 +36,10 @@ bump: ## Bump version: make bump part=patch|minor|major
 
 lock: ## Update the lockfile
 	uv lock
+
+fix: ## Run ruff linter and apply fixes
+	uv run ruff format .
+	uv run ruff check --fix .
 
 check: lint typecheck format test license-check ## Run all checks (lint, typecheck, format, test)
 

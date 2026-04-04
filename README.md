@@ -44,7 +44,6 @@ pip install avrokit[all]
 ```bash
 git clone https://github.com/brandtg/avrokit.git
 cd avrokit
-poetry env use python3.12
 make install
 ```
 
@@ -285,15 +284,12 @@ avrokit toparquet INPUT.avro OUTPUT.parquet
 ### Prerequisites
 
 - Python 3.12+
-- Poetry
+- uv
 - Docker (for GCS/S3 integration tests)
 
 ### Setup
 
 ```bash
-# Set up Python environment
-poetry env use python3.12
-
 # Install dependencies
 make install
 
@@ -311,7 +307,7 @@ make test
 make test-coverage
 
 # Run tests in parallel (default)
-poetry run pytest -n auto
+uv run pytest -n auto
 ```
 
 ### Code Quality
