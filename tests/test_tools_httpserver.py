@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import concurrent.futures as futures
 import json
 import tempfile
 import threading
@@ -158,3 +159,51 @@ class TestHttpServerTool:
         # Check that the file is gone
         res = requests.get(f"{http_url}/newfile.avro")
         assert res.status_code == 404
+
+    def test_invalid_accept_header(self, tmpserver):
+        http_url, _ = tmpserver
+        res = requests.get(
+            f"{http_url}/test.avro", headers={"Accept": "application/unknown"}
+        )
+        assert res.status_code in [406, 200]
+
+    def test_concurrent_requests(self, tmpserver):
+        http_url, _ = tmpserver
+
+        def make_request():
+            res = requests.get(
+                f"{http_url}/test.avro", headers={"Accept": "application/json"}
+            )
+            data = [
+                json.loads(line) for line in res.content.decode("utf-8").splitlines()
+            ]
+            return len(data)
+
+        with futures.ThreadPoolExecutor(max_workers=10) as executor:
+            results = list(executor.map(lambda _: make_request(), range(5)))
+
+        assert all(isinstance(r, int) for r in results), (
+            "All results should be integers"
+        )
+        assert len(results) == 5, f"Expected 5 results, got {len(results)}"
+        expected_count = 10
+        for result in results:
+            assert result == expected_count, (
+                f"Expected count {expected_count}, got {result}"
+            )
+
+    def test_file_not_found(self, tmpserver):
+        http_url, _ = tmpserver
+        res = requests.get(f"{http_url}/nonexistent.avro")
+        assert res.status_code == 404
+
+    def test_put_invalid_schema_json(self, tmpserver):
+        http_url, root_url = tmpserver
+        res = requests.put(f"{http_url}/invalid_file.avro", json={"type": "recordy"})
+        assert res.status_code in [400, 500]
+
+
+def test_post_to_nonexistent_file(tmpserver):
+    http_url, root_url = tmpserver
+    res = requests.post(f"{http_url}/newfile.avro", json={"name": "test"})
+    assert res.status_code in [201, 405, 404]

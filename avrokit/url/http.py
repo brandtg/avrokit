@@ -57,9 +57,12 @@ class HttpURL(URL):
         try:
             response = requests.head(self.url, timeout=5)
             if response.ok:
-                return int(response.headers.get("Content-Length", 0))
+                content_length = response.headers.get("Content-Length")
+                if content_length is not None:
+                    return int(content_length)
+                return 0
             return 0
-        except requests.RequestException:
+        except (requests.RequestException, ValueError):
             return 0
 
     @override
