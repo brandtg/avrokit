@@ -6,10 +6,11 @@ from __future__ import annotations
 
 from collections.abc import Generator, Iterator, Sequence
 from contextlib import contextmanager
-from typing import IO, Any, Self, cast
+from typing import IO, Any, cast
 
 from avro.datafile import DataFileReader
 from avro.io import DatumReader
+from typing_extensions import Self
 
 from ..url import URL
 

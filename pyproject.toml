@@ -4,18 +4,20 @@
 
 [project]
 name = "avrokit"
-version = "0.0.7"
+version = "0.1.0"
 description = "Python utilities for working with Avro data files"
 authors = [{ name = "Greg Brandt", email = "brandt.greg@gmail.com" }]
 license = "Apache-2.0"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 keywords = ["avro", "data", "serialization", "gcs", "s3", "parquet"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Typing :: Typed",
@@ -28,6 +30,7 @@ dependencies = [
   "boto3-stubs[s3]>=1.38.8",
   "types-requests>=2.32.0.20250328",
   "pyarrow>=22.0.0",
+  "typing-extensions>=4.12.0",
 ]
 
 [project.optional-dependencies]
@@ -66,6 +69,7 @@ filterwarnings = ["ignore::DeprecationWarning:botocore.*"]
 
 [tool.ruff]
 exclude = []
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]

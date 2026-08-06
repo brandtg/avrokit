@@ -7,11 +7,12 @@ import os
 import tempfile
 from collections.abc import Generator, Sequence
 from contextlib import contextmanager
-from typing import IO, Any, cast, override
+from typing import IO, Any, cast
 
 from google.api_core.exceptions import NotFound
 from google.auth.credentials import AnonymousCredentials
 from google.cloud import storage
+from typing_extensions import override
 
 from .base import URL
 

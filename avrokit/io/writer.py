@@ -10,18 +10,13 @@ from collections.abc import Generator, Mapping, Sequence
 from contextlib import contextmanager
 from datetime import datetime
 from itertools import groupby
-from typing import (
-    IO,
-    Any,
-    Literal,
-    Protocol,
-    Self,
-)
+from typing import IO, Any, Literal, Protocol
 
 from avro.datafile import NULL_CODEC, DataFileWriter
 from avro.io import DatumWriter
 from avro.schema import Schema
 from datetime_truncate import truncate as truncate_datetime
+from typing_extensions import Self
 
 from avrokit.url.utils import flatten_urls
 
