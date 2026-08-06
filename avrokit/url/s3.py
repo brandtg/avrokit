@@ -6,10 +6,11 @@ import io
 import tempfile
 from collections.abc import Sequence
 from contextlib import contextmanager
-from typing import IO, Any, cast, override
+from typing import IO, Any, cast
 
 import boto3
 from mypy_boto3_s3 import S3Client
+from typing_extensions import override
 
 from .base import URL
 

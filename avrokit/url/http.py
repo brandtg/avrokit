@@ -5,9 +5,10 @@
 import io
 import tempfile
 from collections.abc import Sequence
-from typing import IO, Any, override
+from typing import IO, Any
 
 import requests
+from typing_extensions import override
 
 from .base import URL
 

@@ -6,7 +6,9 @@ import glob
 import os
 import shutil
 from collections.abc import Sequence
-from typing import IO, Any, override
+from typing import IO, Any
+
+from typing_extensions import override
 
 from .base import URL
 
