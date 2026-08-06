@@ -9,6 +9,8 @@ Integration tests for command-line tools in avrokit.
 import json
 import os
 import tempfile
+from datetime import date, datetime, timezone
+from decimal import Decimal
 from typing import cast
 
 import pytest
@@ -444,6 +446,74 @@ class TestToJsonTool:
                     record = json.loads(line)
                     assert record["id"] == i
                     assert record["name"] == f"name_{i}"
+
+    def test_tojson_logical_types(self):
+        """Test that Avro logical types (timestamps, dates, decimals) are serialized."""
+        schema = avro_schema(
+            {
+                "type": "record",
+                "name": "Test",
+                "fields": [
+                    {"name": "id", "type": "int"},
+                    {
+                        "name": "created_at",
+                        "type": {"type": "long", "logicalType": "timestamp-millis"},
+                    },
+                    {"name": "day", "type": {"type": "int", "logicalType": "date"}},
+                    {
+                        "name": "amount",
+                        "type": {
+                            "type": "bytes",
+                            "logicalType": "decimal",
+                            "precision": 10,
+                            "scale": 2,
+                        },
+                    },
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            avro_file = os.path.join(tmpdir, "input.avro")
+            json_file = os.path.join(tmpdir, "output.json")
+            avro_url = parse_url(avro_file)
+
+            with avro_writer(avro_url.with_mode("wb"), schema) as writer:
+                writer.append(
+                    {
+                        "id": 1,
+                        "created_at": datetime(
+                            2025, 1, 2, 3, 4, 5, tzinfo=timezone.utc
+                        ),
+                        "day": date(2025, 1, 2),
+                        "amount": Decimal("12.34"),
+                    }
+                )
+
+            tool = ToJsonTool()
+
+            import argparse
+
+            args = argparse.Namespace(url=[avro_file])
+
+            with open(json_file, "w") as f:
+                import sys
+
+                old_stdout = sys.stdout
+                sys.stdout = f
+                try:
+                    tool.run(args)
+                finally:
+                    sys.stdout = old_stdout
+
+            with open(json_file) as f:
+                lines = f.readlines()
+                assert len(lines) == 1
+                record = json.loads(lines[0])
+                assert record["id"] == 1
+                assert record["created_at"] == "2025-01-02T03:04:05+00:00"
+                assert record["day"] == "2025-01-02"
+                assert record["amount"] == "12.34"
 
 
 class TestGetSchemaTool:
