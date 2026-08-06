@@ -17,6 +17,7 @@ from avro.io import DatumReader
 
 from ..io import avro_reader, avro_schema, avro_writer, read_avro_schema
 from ..url import URL, parse_url
+from .tojson import AvroJsonEncoder
 
 logger = logging.getLogger(__name__)
 
@@ -195,7 +196,9 @@ class AvroHTTPRequestHandler(BaseHTTPRequestHandler):
                     self.send_header("Content-type", "application/jsonl")
                     self.end_headers()
                     for record in reader:
-                        self.wfile.write(json.dumps(record).encode("utf-8"))
+                        self.wfile.write(
+                            json.dumps(record, cls=AvroJsonEncoder).encode("utf-8")
+                        )
                         self.wfile.write(b"\n")
             elif self._is_avro_binary(accept):
                 with data_url as f:

@@ -5,9 +5,22 @@
 import argparse
 import json
 import sys
+from datetime import date, datetime, time
+from decimal import Decimal
 
 from ..io import avro_reader
 from ..url import flatten_urls, parse_url
+
+
+class AvroJsonEncoder(json.JSONEncoder):
+    """Encodes Avro logical types (datetime, date, time, decimal) as JSON."""
+
+    def default(self, o: object) -> object:
+        if isinstance(o, datetime | date | time):
+            return o.isoformat()
+        if isinstance(o, Decimal):
+            return str(o)
+        return super().default(o)
 
 
 class ToJsonTool:
@@ -30,5 +43,5 @@ class ToJsonTool:
         for url in urls:
             with avro_reader(url) as reader:
                 for record in reader:
-                    json.dump(record, sys.stdout)
+                    json.dump(record, sys.stdout, cls=AvroJsonEncoder)
                     sys.stdout.write("\n")

@@ -6,6 +6,7 @@ import concurrent.futures as futures
 import json
 import tempfile
 import threading
+from datetime import datetime, timezone
 
 import pytest
 import requests
@@ -98,6 +99,34 @@ class TestHttpServerTool:
             for email in item["emails"]:
                 assert isinstance(email, str)
                 assert "@" in email
+
+    def test_get_json_logical_types(self, tmpserver):
+        http_url, root_url = tmpserver
+        schema = avro_schema(
+            {
+                "type": "record",
+                "name": "Event",
+                "fields": [
+                    {
+                        "name": "created_at",
+                        "type": {"type": "long", "logicalType": "timestamp-millis"},
+                    },
+                ],
+            }
+        )
+        with avro_writer(
+            root_url.with_path("logical.avro").with_mode("wb"), schema
+        ) as writer:
+            writer.append(
+                {"created_at": datetime(2025, 1, 2, 3, 4, 5, tzinfo=timezone.utc)}
+            )
+        res = requests.get(
+            f"{http_url}/logical.avro", headers={"Accept": "application/json"}
+        )
+        res.raise_for_status()
+        data = [json.loads(line) for line in res.content.decode("utf-8").splitlines()]
+        assert len(data) == 1
+        assert data[0]["created_at"] == "2025-01-02T03:04:05+00:00"
 
     def test_get_avro(self, tmpserver):
         http_url, _ = tmpserver
