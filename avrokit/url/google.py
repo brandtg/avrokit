@@ -152,7 +152,16 @@ class GoogleCloudStorageURL(URL):
                     self._current_remote.upload_from_filename(self._current_local.name)
             finally:
                 # Cleanup resources
-                self._current_local.close()  # N.b. deletes on close
+                local = self._current_local
+                name = local.name
+                local.close()
+                # N.b. the temp file is created with delete=False so it survives an external
+                # close (e.g. DataFileWriter closing the stream before URL.close() uploads).
+                # Unlink it explicitly here to avoid leaking a file per open/close cycle.
+                try:
+                    os.unlink(name)
+                except FileNotFoundError:
+                    pass
                 self._current_client.close()
                 self._current_local = None
                 self._current_local_stream = None

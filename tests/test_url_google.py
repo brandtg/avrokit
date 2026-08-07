@@ -13,7 +13,7 @@ from filelock import FileLock
 
 from avrokit.io import avro_reader, avro_schema, avro_writer
 from avrokit.url.factory import parse_url
-from avrokit.url.google import google_cloud_storage_client
+from avrokit.url.google import GoogleCloudStorageURL, google_cloud_storage_client
 
 faker = Faker()
 
@@ -163,3 +163,50 @@ class TestGoogleCloudStorageURL:
         ]
         # No matches returns empty list
         assert parse_url(f"{base}/nonexistent_*.avro").expand() == []
+
+    def test_no_temp_file_leak(self, monkeypatch):
+        class FakeBlob:
+            def __init__(self):
+                self.content = b""
+
+            def download_to_file(self, f):
+                f.write(self.content)
+                f.flush()
+
+            def upload_from_filename(self, name):
+                with open(name, "rb") as f:
+                    self.content = f.read()
+
+        class FakeBucket:
+            def __init__(self):
+                self.blob_obj = FakeBlob()
+
+            def blob(self, path):
+                return self.blob_obj
+
+        class FakeClient:
+            def __init__(self):
+                self.bucket_obj = FakeBucket()
+
+            def bucket(self, name):
+                return self.bucket_obj
+
+            def close(self):
+                pass
+
+        fake_client = FakeClient()
+        monkeypatch.setattr("avrokit.url.google._create_client", lambda: fake_client)
+
+        tmpdir = tempfile.mkdtemp()
+        monkeypatch.setattr(tempfile, "tempdir", tmpdir)
+
+        url = GoogleCloudStorageURL("gs://test-bucket/test/leak.txt", mode="w")
+        with url as f:
+            f.write("hello")
+        assert fake_client.bucket_obj.blob_obj.content == b"hello"
+        assert os.listdir(tmpdir) == []
+
+        url = GoogleCloudStorageURL("gs://test-bucket/test/leak.txt", mode="r")
+        with url as f:
+            assert f.read() == "hello"
+        assert os.listdir(tmpdir) == []
