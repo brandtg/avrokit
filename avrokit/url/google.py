@@ -59,7 +59,7 @@ class GoogleCloudStorageURL(URL):
         return self.url == value.url
 
     @override
-    def expand(self) -> Sequence[URL]:
+    def _expand(self) -> Sequence[URL]:
         with google_cloud_storage_client() as client:
             try:
                 path = self.path

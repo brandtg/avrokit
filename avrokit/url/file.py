@@ -21,20 +21,7 @@ class FileURL(URL):
         self.fh: IO[Any] | None = None
 
     @override
-    def expand(self) -> Sequence[URL]:
-        # Check if the path contains wildcard characters
-        if "*" in self.path or "?" in self.path or "[" in self.path:
-            # Use glob to expand the pattern
-            matches = glob.glob(self.path)
-            if not matches:
-                # No matches found, return empty list
-                return []
-            # Return sorted list of FileURL objects for all matches
-            return [
-                FileURL(self.prefix + match, mode=self.mode)
-                for match in sorted(matches)
-            ]
-
+    def _expand(self) -> Sequence[URL]:
         # If it's a regular file or doesn't exist (no expansion needed)
         if os.path.isfile(self.path) or not os.path.exists(self.path):
             return [self]
@@ -47,6 +34,15 @@ class FileURL(URL):
                     FileURL(self.prefix + os.path.join(root, filename), mode=self.mode)
                 )
         return acc
+
+    @override
+    def _expand_glob(self) -> Sequence[URL]:
+        matches = glob.glob(self.path)
+        if not matches:
+            return []
+        return [
+            FileURL(self.prefix + match, mode=self.mode) for match in sorted(matches)
+        ]
 
     @override
     def delete(self) -> None:

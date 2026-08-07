@@ -4,10 +4,11 @@
 
 from __future__ import annotations
 
+import fnmatch
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from typing import IO, Any
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 
 class URL(ABC):
@@ -22,12 +23,43 @@ class URL(ABC):
     def __str__(self) -> str:
         return self.url
 
-    @abstractmethod
     def expand(self) -> Sequence[URL]:
+        """
+        Expands the URL into all the URLs that represent concrete resources.
+
+        If the final path element contains glob wildcards, the parent path is
+        expanded and the results are filtered client-side with fnmatch.
+        """
+        if self._has_glob():
+            return self._expand_glob()
+        return self._expand()
+
+    @abstractmethod
+    def _expand(self) -> Sequence[URL]:
         """
         Expands the URL into all the URLs that represent concrete resources.
         """
         ...
+
+    def _has_glob(self) -> bool:
+        return any(c in self.parsed_url.path for c in "*?[")
+
+    def _expand_glob(self) -> Sequence[URL]:
+        path = self.parsed_url.path
+        wildcard_idx = min(idx for idx in (path.find(c) for c in "*?[") if idx != -1)
+        prefix = path[:wildcard_idx]
+        parent = self._with_path(prefix)
+        return [
+            url
+            for url in parent.expand()
+            if url.url != parent.url and fnmatch.fnmatch(url.parsed_url.path, path)
+        ]
+
+    def _with_path(self, path: str) -> URL:
+        new_url = urlunparse(
+            (self.parsed_url.scheme, self.parsed_url.netloc, path, "", "", "")
+        )
+        return type(self)(new_url, mode=self.mode)
 
     @abstractmethod
     def delete(self) -> None:
