@@ -36,6 +36,19 @@ class TestFileURL:
         assert isinstance(expanded_urls[0], FileURL)
         assert expanded_urls[0].url == f"file://{tmpdir}/file_0.txt"
 
+    def test_expand_glob(self, tmpdir):
+        url = FileURL(f"file://{tmpdir}/file_*.txt")
+        expanded_urls = url.expand()
+        assert len(expanded_urls) == 10
+        assert all(isinstance(u, FileURL) for u in expanded_urls)
+        assert [u.url for u in expanded_urls] == [
+            f"file://{tmpdir}/file_{i}.txt" for i in range(10)
+        ]
+
+    def test_expand_glob_no_match(self, tmpdir):
+        url = FileURL(f"file://{tmpdir}/nonexistent_*.txt")
+        assert url.expand() == []
+
     def test_exists_directory(self, tmpdir):
         url = FileURL(f"file://{tmpdir}")
         assert url.exists()

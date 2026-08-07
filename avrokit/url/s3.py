@@ -34,7 +34,7 @@ class S3URL(URL):
         self._current_local_stream: IO[Any] | None = None
 
     @override
-    def expand(self) -> Sequence[URL]:
+    def _expand(self) -> Sequence[URL]:
         with s3_client() as client:
             path = self.path
             if not path.endswith("/"):
@@ -49,7 +49,9 @@ class S3URL(URL):
                     for obj in page["Contents"]:
                         key = obj.get("Key")
                         if key:
-                            urls.append(S3URL(self._append_path(key), mode=self.mode))
+                            urls.append(
+                                S3URL(f"s3://{self.bucket}/{key}", mode=self.mode)
+                            )
             if not urls:
                 # N.b. we also include URLs that don't exist yet here because there is nothing to expand
                 return [self]

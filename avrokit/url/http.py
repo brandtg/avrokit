@@ -36,7 +36,7 @@ class HttpURL(URL):
         self._current_request_buffer: IO[Any] | None = None
 
     @override
-    def expand(self) -> Sequence[URL]:
+    def _expand(self) -> Sequence[URL]:
         # N.b. no way to "expand" an HTTP URL, i.e. discover sub resources
         return [self]
 

@@ -58,6 +58,25 @@ class TestS3URL:
         url.delete()
         assert url.exists() is False
 
+    def test_expand_glob(self, s3_bucket):
+        base = f"{s3_bucket}/test/glob"
+        for i in range(5):
+            url = parse_url(f"{base}/part_{i}.avro")
+            if url.exists():
+                url.delete()
+            with url.with_mode("w") as f:
+                f.write(f"Content {i}")
+        # Also create a non-matching file
+        other = parse_url(f"{base}/other.txt")
+        with other.with_mode("w") as f:
+            f.write("other")
+        expanded = parse_url(f"{base}/*.avro").expand()
+        assert sorted(u.url for u in expanded) == [
+            f"{base}/part_{i}.avro" for i in range(5)
+        ]
+        # No matches returns empty list
+        assert parse_url(f"{base}/nonexistent_*.avro").expand() == []
+
     def test_avro(self, s3_bucket):
         url = parse_url(f"{s3_bucket}/test/avro/file.avro")
         # Clean up any existing file

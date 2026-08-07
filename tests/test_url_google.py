@@ -144,3 +144,22 @@ class TestGoogleCloudStorageURL:
         # Delete the file
         url.delete()
         assert url.exists() is False
+
+    def test_expand_glob(self, gcs_bucket):
+        base = f"{gcs_bucket}/test/glob"
+        for i in range(5):
+            url = parse_url(f"{base}/part_{i}.avro")
+            if url.exists():
+                url.delete()
+            with url.with_mode("w") as f:
+                f.write(f"Content {i}")
+        # Also create a non-matching file
+        other = parse_url(f"{base}/other.txt")
+        with other.with_mode("w") as f:
+            f.write("other")
+        expanded = parse_url(f"{base}/*.avro").expand()
+        assert sorted(u.url for u in expanded) == [
+            f"{base}/part_{i}.avro" for i in range(5)
+        ]
+        # No matches returns empty list
+        assert parse_url(f"{base}/nonexistent_*.avro").expand() == []
