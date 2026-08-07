@@ -4,7 +4,7 @@
 
 [project]
 name = "avrokit"
-version = "0.1.2"
+version = "0.1.3"
 description = "Python utilities for working with Avro data files"
 authors = [{ name = "Greg Brandt", email = "brandt.greg@gmail.com" }]
 license = "Apache-2.0"
