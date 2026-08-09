@@ -80,11 +80,13 @@ class ConcatTool:
 
         output_sync_marker = None
 
-        with output_url.with_mode("wb").open() as out_f:
+        out_url = output_url.with_mode("wb")
+        with out_url as out_f:
             writer = BinaryEncoder(out_f)
 
             for i, url in enumerate(input_urls):
-                with url.with_mode("rb").open() as in_f:
+                in_url = url.with_mode("rb")
+                with in_url as in_f:
                     # Initialize DataFileReader to parse the header/metadata and
                     # position the file pointer at the start of the first block.
                     reader = DataFileReader(in_f, DatumReader())

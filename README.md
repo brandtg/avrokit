@@ -77,24 +77,23 @@ avrokit concat file1.avro file2.avro s3://bucket/file3.avro output.avro
 from avrokit import avro_reader, avro_records, avro_writer, avro_schema, parse_url
 
 # Read records from any URL
-url = parse_url('gs://bucket/data.avro', mode='rb')
+url = parse_url("gs://bucket/data.avro", mode="rb")
 for record in avro_records(url):
     print(record)
 
 # Write Avro data
-schema = avro_schema({
-    'type': 'record',
-    'name': 'User',
-    'fields': [
-        {'name': 'name', 'type': 'string'},
-        {'name': 'age', 'type': 'int'}
-    ]
-})
+schema = avro_schema(
+    {
+        "type": "record",
+        "name": "User",
+        "fields": [{"name": "name", "type": "string"}, {"name": "age", "type": "int"}],
+    }
+)
 
-url = parse_url('output.avro', mode='wb')
+url = parse_url("output.avro", mode="wb")
 with avro_writer(url, schema) as writer:
-    writer.append({'name': 'Alice', 'age': 30})
-    writer.append({'name': 'Bob', 'age': 25})
+    writer.append({"name": "Alice", "age": 30})
+    writer.append({"name": "Bob", "age": 25})
 ```
 
 ## Architecture
@@ -117,10 +116,10 @@ The `parse_url()` factory function automatically instantiates the correct URL cl
 from avrokit.url import parse_url
 
 # All of these return the appropriate URL subclass
-url1 = parse_url('file:///path/to/data.avro')      # FileURL
-url2 = parse_url('gs://bucket/data.avro')           # GCSURL
-url3 = parse_url('s3://bucket/data.avro')           # S3URL
-url4 = parse_url('https://example.com/data.avro')   # HTTPURL
+url1 = parse_url("file:///path/to/data.avro")  # FileURL
+url2 = parse_url("gs://bucket/data.avro")  # GCSURL
+url3 = parse_url("s3://bucket/data.avro")  # S3URL
+url4 = parse_url("https://example.com/data.avro")  # HTTPURL
 ```
 
 ### 2. I/O Layer (`avrokit.io`)
@@ -362,13 +361,13 @@ The GitHub Actions workflow will automatically build and publish to PyPI.
 from avrokit import PartitionedAvroReader, PartitionedAvroWriter, parse_url
 
 # Read from multiple files as single stream
-url = parse_url('data-*.avro', mode='rb')
+url = parse_url("data-*.avro", mode="rb")
 with PartitionedAvroReader(url) as reader:
     for record in reader:
         process(record)
 
 # Write to multiple files (roll every 10000 records)
-url = parse_url('output/', mode='wb')
+url = parse_url("output/", mode="wb")
 with PartitionedAvroWriter(url, schema, max_records=10000) as writer:
     for record in records:
         writer.append(record)
@@ -383,15 +382,12 @@ from avrokit import TimePartitionedAvroWriter, parse_url
 from datetime import datetime
 
 # Creates hourly files: output/2024/01/15/10.avro
-url = parse_url('output/', mode='wb')
+url = parse_url("output/", mode="wb")
 with TimePartitionedAvroWriter(
-    url,
-    schema,
-    time_granularity='hour',
-    time_field='timestamp'
+    url, schema, time_granularity="hour", time_field="timestamp"
 ) as writer:
     for record in records:
-        writer.append(record, timestamp=record['timestamp'])
+        writer.append(record, timestamp=record["timestamp"])
 ```
 
 ### Async Operations
@@ -401,14 +397,16 @@ import asyncio
 from avrokit.asyncio import DeferredAvroWriter
 from avrokit import parse_url, avro_schema
 
+
 async def write_async():
-    url = parse_url('output.avro', mode='wb')
+    url = parse_url("output.avro", mode="wb")
     schema = avro_schema({...})
 
     async with DeferredAvroWriter(url, schema) as writer:
         for record in records:
             await writer.append(record)
         # Flushes happen automatically in background
+
 
 asyncio.run(write_async())
 ```
@@ -420,13 +418,13 @@ from avrokit import validate_avro_schema_evolution, read_avro_schema
 from avrokit.url import parse_url
 
 # Check if new schema is backward compatible
-reader_schema = read_avro_schema(parse_url('old.avro', 'rb'))
-writer_schema = read_avro_schema(parse_url('new.avro', 'rb'))
+reader_schema = read_avro_schema(parse_url("old.avro", "rb"))
+writer_schema = read_avro_schema(parse_url("new.avro", "rb"))
 
 is_valid = validate_avro_schema_evolution(
     reader_schema,
     writer_schema,
-    strategy='backward'  # or 'forward', 'full'
+    strategy="backward",  # or 'forward', 'full'
 )
 ```
 

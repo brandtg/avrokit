@@ -90,7 +90,7 @@ class FileSortTool:
         schema: Schema,
         root: str,
         batch_id: int,
-        records: list[object],
+        records: list[dict[str, Any]],
         sort_key: Callable[[Any], Any],
         reverse: bool = False,
     ) -> None:

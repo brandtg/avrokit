@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import io
+import os
 import tempfile
 from collections.abc import Sequence
 from contextlib import contextmanager
@@ -125,7 +126,16 @@ class S3URL(URL):
                         self._current_client.upload_fileobj(f, self.bucket, self.path)
             finally:
                 # Cleanup resources
-                self._current_local.close()
+                local = self._current_local
+                name = local.name
+                local.close()
+                # N.b. the temp file is created with delete=False so it survives an external
+                # close (e.g. DataFileWriter closing the stream before URL.close() uploads).
+                # Unlink it explicitly here to avoid leaking a file per open/close cycle.
+                try:
+                    os.unlink(name)
+                except FileNotFoundError:
+                    pass
                 self._current_client.close()
                 self._current_local = None
                 self._current_client = None

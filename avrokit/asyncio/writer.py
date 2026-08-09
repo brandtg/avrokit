@@ -43,6 +43,20 @@ class DeferredAvroWriter:
         self._writer_thread_done.set()
         self._writer_thread.join()
 
+    def close(self) -> None:
+        self.stop()
+        # Close the underlying writer if it supports it (e.g. DataFileWriter)
+        close_fn = getattr(self.writer, "close", None)
+        if close_fn:
+            close_fn()
+
+    def __enter__(self) -> "DeferredAvroWriter":
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
     def append(
         self, datum: object, block: bool = True, timeout: int | None = None
     ) -> None:
