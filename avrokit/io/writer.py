@@ -128,6 +128,8 @@ class PartitionedAvroWriter:
         if self.current_writer:
             self.current_writer.close()
             self.current_writer = None
+        if self.current_url:
+            self.current_url.close()
         self.current_url_stream = None
         self.current_url = None
 

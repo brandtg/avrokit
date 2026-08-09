@@ -85,6 +85,8 @@ class PartitionedAvroReader:
         if self.current_reader:
             self.current_reader.close()
             self.current_reader = None
+        if self.current_url:
+            self.current_url.close()
         self.current_url_stream = None
         self.current_index = 0
 

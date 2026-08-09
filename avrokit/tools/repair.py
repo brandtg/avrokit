@@ -147,6 +147,7 @@ class RepairTool:
                 if dry_run:
                     tmp = tempfile.NamedTemporaryFile(delete=False)
                     output_url = parse_url(tmp.name, mode="wb")
+                    tmp.close()  # Close the handle; the URL will open it fresh
                     logger.debug("Using temporary file %s for dry run", output_url)
                 # Initialize the output file with the same schema and codec
                 with avro_writer(output_url, schema, codec=codec) as writer:

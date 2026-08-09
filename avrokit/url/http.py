@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import io
+import os
 import tempfile
 from collections.abc import Sequence
 from typing import IO, Any
@@ -34,6 +35,7 @@ class HttpURL(URL):
         self.content_type = content_type
         self._current_response: requests.Response | None = None
         self._current_request_buffer: IO[Any] | None = None
+        self._current_request_temp_path: str | None = None
 
     @override
     def _expand(self) -> Sequence[URL]:
@@ -84,9 +86,11 @@ class HttpURL(URL):
             if self.spill_request_to_file:
                 # Use a temporary file to store the request body
                 buf = tempfile.NamedTemporaryFile(delete=False)
+                self._current_request_temp_path = buf.name
             else:
                 # Use an in-memory buffer
                 buf = io.BytesIO()
+                self._current_request_temp_path = None
             # Wrap in TextIOWrapper if not binary mode
             if "b" not in self.mode:
                 buf = io.TextIOWrapper(buf, encoding="utf-8")
@@ -112,8 +116,15 @@ class HttpURL(URL):
                 headers={"Content-Type": self.content_type},
             )
             res.raise_for_status()
-            # Close the buffer (will delete temp file if used)
+            # Close the buffer
             self._current_request_buffer.close()
+            # Unlink temp file if used
+            if self._current_request_temp_path is not None:
+                try:
+                    os.unlink(self._current_request_temp_path)
+                except FileNotFoundError:
+                    pass
+                self._current_request_temp_path = None
 
     @override
     def with_mode(self, mode) -> URL:
