@@ -26,7 +26,15 @@ Python utilities for working with Avro data files with support for local files, 
 pip install avrokit
 ```
 
-### With Cloud Storage Support
+### With pipx (CLI tools)
+
+```bash
+# Installs the avrokit CLI in an isolated environment,
+# with support for snappy-compressed Avro files
+pipx install avrokit[snappy]
+```
+
+### With Optional Extras
 
 ```bash
 # AWS S3 support
@@ -35,7 +43,10 @@ pip install avrokit[aws]
 # Google Cloud Storage support
 pip install avrokit[gcp]
 
-# All extras (S3 + GCS)
+# Snappy codec support (for reading snappy-compressed files)
+pip install avrokit[snappy]
+
+# All extras (S3 + GCS + snappy)
 pip install avrokit[all]
 ```
 
