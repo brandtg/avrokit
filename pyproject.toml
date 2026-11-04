@@ -36,7 +36,8 @@ dependencies = [
 [project.optional-dependencies]
 aws = ["boto3>=1.38.7"]
 gcp = ["google-cloud-storage>=3.6.0", "google-crc32c>=1.7.1"]
-all = ["boto3>=1.38.7", "google-cloud-storage>=3.6.0", "google-crc32c>=1.7.1"]
+snappy = ["python-snappy>=0.7.3"]
+all = ["boto3>=1.38.7", "google-cloud-storage>=3.6.0", "google-crc32c>=1.7.1", "python-snappy>=0.7.3"]
 
 [project.urls]
 Homepage = "https://github.com/brandtg/avrokit"
