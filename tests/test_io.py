@@ -61,6 +61,25 @@ class TestSingleFileIO:
                     count += 1
                 assert count == 100
 
+    def test_read_write_snappy_codec(self):
+        with tempfile.NamedTemporaryFile() as tmp:
+            url = parse_url(tmp.name)
+            with avro_writer(url.with_mode("wb"), SCHEMA, codec="snappy") as writer:
+                for _ in range(100):
+                    writer.append(
+                        {
+                            "name": faker.name(),
+                            "age": faker.random_int(min=18, max=80),
+                            "emails": [faker.email() for _ in range(3)],
+                        }
+                    )
+            # Codec is recorded in the file header metadata
+            with avro_reader(url.with_mode("rb")) as reader:
+                assert reader.meta["avro.codec"] == b"snappy"
+            # Roundtrip: all records readable after snappy compression
+            with avro_reader(url.with_mode("rb")) as reader:
+                assert sum(1 for _ in reader) == 100
+
     def test_write_text_mode(self):
         with tempfile.NamedTemporaryFile() as tmp, pytest.raises(ValueError):
             # Attempt to write to a file opened in text mode
